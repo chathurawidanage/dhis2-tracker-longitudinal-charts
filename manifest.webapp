@@ -1,0 +1,25 @@
+{
+  "version": "0.0.1",
+  "name": "Tracker Longitudinal Charts",
+  "description": "Responsive Web application for easy visualization of standard data",
+  "icons": {
+    "16": "/img/icons/raptor-16.png",
+    "48": "/img/icons/raptor-48.png",
+    "128": "/img/icons/raptor-128.png"
+  },
+  "developer": {
+    "url": "http://www.dhis2.org",
+    "name": "Bendik Kvamstad, Stian Lind Petlund, Kristian Saksvik Munkvold, Martin Holøs",
+    "company": null,
+    "email": null
+  },
+  "activities": {
+    "dhis": {
+      "href": "*"
+    }
+  },
+  "launchUrl": null,
+  "launch_path": "index.html#/",
+  "installs_allowed_from": null,
+  "default_locale": "en"
+}

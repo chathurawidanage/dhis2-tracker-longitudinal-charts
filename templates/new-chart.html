@@ -1,0 +1,29 @@
+<div ng-controller="ChartController as cctrl">
+    <md-content layout-padding>
+        {{cctrl.program}}
+        <form name="chartForm">
+            <md-input-container class="md-block">
+                <label>Title</label>
+                <input required name="title">
+            </md-input-container>
+            <md-input-container class="md-block">
+                <label>Program</label>
+                <md-select ng-model="cctrl.program" ng-change="cctrl.refreshDataElements()">
+                    <md-option ng-repeat="program in cctrl.programs" value="{{program.id}}">
+                        {{program.displayName}}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+            <md-input-container>
+                <label>Dependant Axis (Y)</label>
+                <md-select ng-model="cctrl.yAxisDataElement">
+                    <md-option ng-repeat="de in cctrl.dataElements" value="{{de.id}}">
+                        {{de.name}}
+                    </md-option>
+                </md-select>
+            </md-input-container>
+        </form>
+    </md-content>
+</div>
+
+<canvas id="myChart" width="600" height="400"></canvas>
