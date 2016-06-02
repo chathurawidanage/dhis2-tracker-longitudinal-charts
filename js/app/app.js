@@ -1,4 +1,4 @@
-var app = angular.module('long-charts', ['ngMaterial', 'ngRoute', 'longitudinalChartControllers','dropzone']);
+var app = angular.module('long-charts', ['ngMaterial', 'ngRoute', 'longitudinalChartControllers','dropzone','chart.js','mdColorPicker']);
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {
         templateUrl: 'templates/dashboard.html',
@@ -39,8 +39,10 @@ app.directive('chart', function () {
         template: '<canvas id="chartCanvas" width="400" height="400"></canvas>',
         link: function (scope, element, attrs) {
             console.log(element);
+            element[0]=document.getElementById("myChart1");
             var ctx = element[0].getContext("2d");
-            var myChart = new Chart(ctx, {
+            console.log(ctx);
+            var myChart = new Chart(element[0], {
                 type: 'bar',
                 data: {
                     labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
@@ -76,6 +78,7 @@ app.directive('chart', function () {
                     }
                 }
             });
+            console.log(myChart);
         }
     }
 });

@@ -33,8 +33,15 @@
 
     <!--Charts JS-->
     <script type="text/javascript" src="js/Chart.js"></script>
+    <script type="text/javascript" src="js/angular-chart.js"></script>
 
+    <!--DropZone-->
+    <script type="text/javascript" src="js/dropzone.js"></script>
 
+    <!--Color Picker-->
+    <link rel="stylesheet" href="css/mdColorPicker.min.css">
+    <script type="text/javascript" src="js/tinycolor-min.js"></script>
+    <script type="text/javascript" src="js/mdColorPicker.min.js"></script>
 </head>
 <body ng-app="long-charts" ng-cloak>
 <div layout="row" layout-padding class="bg-dark-blue nav-dark" layout-align="space-between center">
@@ -61,9 +68,12 @@
     </div>
 </div>
 <div ng-view></div>
+<script type="text/javascript" src="js/app/controllers/ChartController.js"></script>
+<script type="text/javascript" src="js/app/controllers/DashboardController.js"></script>
+<script type="text/javascript" src="js/app/app.js"></script>
+<!--Controllers-->
 
-
-<script type="text/javascript">
+<!--<script type="text/javascript">
 
     var app = angular.module('long-charts', ['ngMaterial', 'ngRoute', 'longitudinalChartControllers']);
     app.config(['$routeProvider', function ($routeProvider) {
@@ -240,6 +250,6 @@
      });
      myChart.update();
      }*/
-</script>
+</script>-->
 </body>
 </html>
