@@ -1,4 +1,4 @@
-var app = angular.module('long-charts', ['ngMaterial', 'ngRoute', 'longitudinalChartControllers','dropzone','chart.js','mdColorPicker']);
+var app = angular.module('long-charts', ['ngMaterial', 'ngRoute', 'longitudinalChartControllers', 'dropzone', 'chart.js', 'mdColorPicker']);
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {
         templateUrl: 'templates/dashboard.html',
@@ -32,53 +32,57 @@ angular.module('dropzone', []).directive('dropzone', function () {
     };
 });
 
-app.directive('chart', function () {
+/**
+ * Chart Service
+ **/
+app.factory('chartService', function ($http, $q) {
     return {
-        restrict: 'E',
-        replace:true,
-        template: '<canvas id="chartCanvas" width="400" height="400"></canvas>',
-        link: function (scope, element, attrs) {
-            console.log(element);
-            element[0]=document.getElementById("myChart1");
-            var ctx = element[0].getContext("2d");
-            console.log(ctx);
-            var myChart = new Chart(element[0], {
-                type: 'bar',
-                data: {
-                    labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
-                    datasets: [{
-                        label: '# of Votes',
-                        data: [12, 19, 3, 5, 2, 3],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',
-                            'rgba(54, 162, 235, 0.2)',
-                            'rgba(255, 206, 86, 0.2)',
-                            'rgba(75, 192, 192, 0.2)',
-                            'rgba(153, 102, 255, 0.2)',
-                            'rgba(255, 159, 64, 0.2)'
-                        ],
-                        borderColor: [
-                            'rgba(255,99,132,1)',
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 206, 86, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(153, 102, 255, 1)',
-                            'rgba(255, 159, 64, 1)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    }
-                }
+        saveChart: function (chart) {
+            var defer = $q.defer();
+            $http.post('../../dataStore/lc/' + chart.id, angular.toJson(chart)).then(function (response) {
+                defer.resolve(response.data);
+            }, function (response) {
+                defer.reject(response);
             });
-            console.log(myChart);
+            return defer.promise;
+        },
+        generateId: function () {
+            var defer = $q.defer();
+            $http.get('../../system/id?limit=1').then(function (response) {
+                defer.resolve(response.data);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
+        getAllIds: function () {
+            var defer = $q.defer();
+            $http.get('../../dataStore/lc/').then(function (response) {
+                defer.resolve(response.data);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
+        getChart: function (chartId) {
+            var defer = $q.defer();
+            $http.get('../../dataStore/lc/' + chartId).then(function (response) {
+                defer.resolve(response.data);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        }
+    }
+});
+
+app.factory('validationService', function () {
+    return {
+        validateString: function (str) {
+            if (str == undefined || str.toString().trim() == "") {
+                return false;
+            }
+            return true;
         }
     }
 });
@@ -90,12 +94,12 @@ app.factory('userService', function ($http, $q) {
     return {
         getCurrentUserId: function () {
             var defer = $q.defer();
-            $http.get('../../api/me.json?fields=id').then(function (response) {
+            $http.get('../../me.json?fields=id').then(function (response) {
                 defer.resolve(response.data.id);
             }, function (response) {
                 defer.reject(response);
             });
-            return defer;
+            return defer.promise;
         }
     }
 });
@@ -109,7 +113,7 @@ app.factory('toastService', function ($mdToast) {
             $mdToast.show(
                 $mdToast.simple()
                     .textContent(msg)
-                    .position('bottom right')
+                    .position('bottom left')
                     .hideDelay(3000)
             );
         }
@@ -130,7 +134,15 @@ app.factory('programService', function ($http, $q) {
             });
             return defer.promise;
         },
-
+        getProgramNameById: function (programId) {
+            var defer = $q.defer();
+            $http.get("../../programs/" + programId + ".json?fields=name").then(function (response) {
+                defer.resolve(response.data.name);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
         getProgramDataElements: function (programId) {
             var defer = $q.defer();
             var url = "../../programs/" + programId + ".json?fields=programStages[programStageDataElements[dataElement[name,id]]]";

@@ -1,44 +1,56 @@
 /**
  * Created by chathura on 6/1/16.
  */
-function ChartController($http, $scope, programService, $timeout) {
+function ChartController($document, $scope, programService, chartService, toastService, validationService) {
     var ctrl = this;
-    this.programs = [];
-    this.program;
 
+    this.lc = new LongitudinalChart();
+
+    this.programs = [];
     this.dataElements = [];
     this.xAxisPeriods = ["Daily", "Weekly", "Monthly", "Yearly"];
 
-    this.yAxisDataElement;
-    this.xAxisPeriod;
+    this.previewAvailable = function () {
+        return this.lc.data.length > 0;
+    }
 
-    this.centiles = [];
+    this.snap = function () {
+        var canvas = document.getElementById('chart-preview');
+        console.log(canvas);
+        var img = canvas.toDataURL("png");
+        return img;
+    }
+
+    this.saveChart = function () {
+        this.validateChart(function () {
+            chartService.saveChart(ctrl.lc).then(function (resp) {
+                console.log(resp);
+            });
+        });
+    }
+
+    this.validateChart = function (callback) {
+        //other validations
+
+        ctrl.lc.img = this.snap();
+        if (ctrl.lc.id == undefined) {
+            chartService.generateId().then(function (resp) {
+                ctrl.lc.id = resp.codes[0];
+                callback();
+            });
+        } else {
+            callback();
+        }
+    }
 
     this.refreshDataElements = function () {
-        console.log("refreshing..");
         ctrl.yAxisDataElement = undefined;
-        programService.getProgramDataElements(ctrl.program).then(function (dataElements) {
+        programService.getProgramDataElements(ctrl.lc.program).then(function (dataElements) {
             ctrl.dataElements = dataElements;
-            console.log(dataElements);
         }).catch(function () {
             console.log("Error in fetching data elements for " + ctrl.program)
         })
     }
-
-    /*Chart*/
-    $scope.labels = [];
-    $scope.series = [];
-    $scope.data = [];
-    $scope.dataColors = [];
-    /* $scope.labels = ["January", "February", "March", "April", "May", "June", "July"];
-     $scope.series = ['Series A', 'Series B'];
-     $scope.data = [
-     [65, 59, 80, 81, 56, 55, 40],
-     [28, 48, 40, 19, 86, 27, 90]
-     ];*/
-    $scope.onClick = function (points, evt) {
-        console.log(points, evt);
-    };
 
     /*Drop zone*/
     $scope.dropzoneConfig = {
@@ -55,7 +67,7 @@ function ChartController($http, $scope, programService, $timeout) {
                 var reader = new FileReader();
                 reader.onload = function () {
                     var csvData = reader.result;
-                    ctrl.loadData(csvData);
+                    ctrl.loadDataFromCSV(csvData);
                 };
                 reader.readAsText(file);
                 console.log(file);
@@ -64,37 +76,45 @@ function ChartController($http, $scope, programService, $timeout) {
         'previewTemplate': '<div class="dz-preview dz-file-preview"> <div class="dz-details"> <div class="dz-filename"><span data-dz-name></span></div> <div class="dz-size" data-dz-size></div> <img data-dz-thumbnail /> </div> <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div> <div class="dz-success-mark"><span>✔</span></div> <div class="dz-error-mark"><span>✘</span></div> <div class="dz-error-message" style="display:none"><span data-dz-errormessage></span></div> </div>'
     };
 
-    ctrl.loadData = function (csvData) {
-        ctrl.centiles = [];
+    ctrl.loadDataFromCSV = function (csvData) {
+        ctrl.lc.centiles = [];
 
-        var rows = csvData.split('\n');
+        var rows = csvData.split('\r\n');
 
         //first row is centile names, remove it
         var centileNames = rows.splice(0, 1).toString().split(",");
         centileNames.forEach(function (centileName) {
             var c = new Centile();
             c.name = centileName;
-            ctrl.centiles.push(c);
+            ctrl.lc.centiles.push(c);
         });
 
         rows.forEach(function (row, i) {
-            if (i >= ctrl.centiles.length) {//just to make sure every thing is smooth
+            if (i >= ctrl.lc.centiles.length) {//just to make sure every thing is smooth
                 return;
             }
             var separatedValues = row.split(",");
             separatedValues.forEach(function (value, j) {
-                ctrl.centiles[i].data[j] = value;
+                ctrl.lc.centiles[i].data[j] = value;
             });
         });
-        ctrl.applyData();
+        ctrl.applyDataFromCSV();
     };
 
+    /**
+     * will be called by UI inputs
+     */
     ctrl.applyData = function () {
+        //do stuff
+        ctrl.applyDataFromCSV();
+    }
+
+    ctrl.applyDataFromCSV = function () {
         var selectedData = [];
         var selectedSeries = [];
         var selectedDataColors = [];
 
-        ctrl.centiles.forEach(function (centile) {
+        ctrl.lc.centiles.forEach(function (centile) {
             if (centile.selected) {
                 selectedData.push(centile.data);
                 selectedSeries.push(centile.name);
@@ -102,10 +122,10 @@ function ChartController($http, $scope, programService, $timeout) {
             }
         });
 
-        $scope.labels = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        $scope.series = selectedSeries;
-        $scope.data = selectedData;
-        $scope.dataColors = selectedDataColors;
+        ctrl.lc.labels = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        ctrl.lc.series = selectedSeries;
+        ctrl.lc.data = selectedData;
+        ctrl.lc.dataColors = selectedDataColors;
         $scope.$apply();
     };
 
@@ -124,7 +144,25 @@ function ChartController($http, $scope, programService, $timeout) {
     function Centile() {
         this.name;
         this.data = [];
-        this.color = '#'+(Math.random()*0xFFFFFF<<0).toString(16);;
+        this.color = '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
         this.selected = true;
+    }
+
+    function LongitudinalChart() {
+        this.id;
+        this.title;//title of the chart
+        this.program;//program Id
+        this.yAxisDataElement;
+        this.xAxisPeriod;
+        this.centiles = [];
+        this.img;
+
+        this.enabled = false;
+
+        //graphical configurations
+        this.labels = [];
+        this.series = [];
+        this.data = [];
+        this.dataColors = [];
     }
 }

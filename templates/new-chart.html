@@ -1,75 +1,88 @@
-<div ng-controller="ChartController as cctrl" layout="row">
-
-    <md-content layout-padding flex="50" style="overflow-x: hidden">
-        <md-card md-theme="default">
-            <md-card-title>
-                <md-card-title-text>
-                    <span class="md-headline">Preview</span>
-                </md-card-title-text>
-            </md-card-title>
-            <md-card-content layout="row" layout-align="space-between">
-                <canvas class="chart chart-line" chart-data="data" chart-labels="labels"
-                        chart-series="series" chart-click="onClick" chart-colors="dataColors"></canvas>
-            </md-card-content>
-        </md-card>
-    </md-content>
-    <md-content layout-padding flex="50">
-        <span class="md-headline">Basic Configurations</span>
-        <form name="chartForm">
-            <md-input-container class="md-block">
-                <label>Title</label>
-                <input required name="title">
-            </md-input-container>
-            <md-input-container class="md-block">
-                <label>Program</label>
-                <md-select ng-model="cctrl.program" ng-change="cctrl.refreshDataElements()">
-                    <md-option ng-repeat="program in cctrl.programs" value="{{program.id}}">
-                        {{program.displayName}}
-                    </md-option>
-                </md-select>
-            </md-input-container>
-            <div layout="row">
-                <md-input-container flex="50">
-                    <label>Dependant Axis (Y)</label>
-                    <md-select ng-model="cctrl.yAxisDataElement">
-                        <md-option ng-repeat="de in cctrl.dataElements" value="{{de.id}}">
-                            {{de.name}}
+<div ng-controller="ChartController as cctrl">
+    <div layout-padding>
+        <h2>Define New Longitudinal Chart</h2>
+    </div>
+    <div layout="row">
+        <md-content layout-padding flex="50" style="overflow-x: hidden">
+            <!--<span class="md-headline">Preview</span>-->
+            <img src="img/nopreview.jpg" ng-if="!cctrl.previewAvailable()">
+            <canvas class="chart chart-line" chart-data="cctrl.lc.data" chart-labels="cctrl.lc.labels"
+                    chart-series="cctrl.lc.series" chart-colors="cctrl.lc.dataColors"
+                    id="chart-preview"></canvas>
+        </md-content>
+        <md-content layout-padding flex="50">
+            <span class="md-headline">Basic Configurations</span>
+            <form name="chartForm">
+                <md-input-container class="md-block">
+                    <label>Title</label>
+                    <input required name="title" ng-model="cctrl.lc.title">
+                </md-input-container>
+                <md-input-container class="md-block">
+                    <label>Program</label>
+                    <md-select ng-model="cctrl.lc.program" ng-change="cctrl.refreshDataElements()">
+                        <md-option ng-repeat="program in cctrl.programs" value="{{program.id}}">
+                            {{program.displayName}}
                         </md-option>
                     </md-select>
                 </md-input-container>
-                <md-input-container flex="50">
-                    <label>Independent Axis (X)</label>
-                    <md-select ng-model="cctrl.xAxisPeriod">
-                        <md-option ng-repeat="period in cctrl.xAxisPeriods" value="{{$index}}">
-                            {{period}}
-                        </md-option>
-                    </md-select>
-                </md-input-container>
-            </div>
-            <div>
-                <span class="md-headline">Reference Data</span>
-            </div>
-            <div>
-                <div dropzone="dropzoneConfig"
-                     style="background-color: #fafafa;width: 100%;height: 60px;overflow: hidden;text-align: center;line-height: 60px">
-                    Drop CSV file here
-                </div>
-            </div>
-            <div layout="row">
-                <table>
-                    <tr ng-repeat="centile in cctrl.centiles">
-                        <td>
+                <md-content layout="row">
+                    <md-input-container flex="50">
+                        <label>Dependant Axis (Y)</label>
+                        <md-select ng-model="cctrl.lc.yAxisDataElement">
+                            <md-option ng-repeat="de in cctrl.dataElements" value="{{de.id}}">
+                                {{de.name}}
+                            </md-option>
+                        </md-select>
+                    </md-input-container>
+                    <md-input-container flex="50">
+                        <label>Independent Axis (X)</label>
+                        <md-select ng-model="cctrl.lc.xAxisPeriod">
+                            <md-option ng-repeat="period in cctrl.xAxisPeriods" value="{{$index}}">
+                                {{period}}
+                            </md-option>
+                        </md-select>
+                    </md-input-container>
+                </md-content>
+                <md-content>
+                    <span class="md-headline">Reference Data</span>
+                </md-content>
+                <md-content>
+                    <div dropzone="dropzoneConfig"
+                         style="background-color: #fafafa;width: 100%;height: 60px;overflow: hidden;text-align: center;line-height: 60px">
+                        Drop CSV file here
+                    </div>
+                </md-content>
+                <md-content>
+                    <md-list flex>
+                        <md-list-item class="md-3-line md-long-text" ng-repeat="centile in cctrl.lc.centiles">
                             <md-switch ng-model="centile.selected"
-                                       ng-change="cctrl.applyData()">
-                                {{centile.name}}
+                                         ng-change="cctrl.applyData()" aria-label="enable">
+                                <h3> {{centile.name}}</h3>
                             </md-switch>
-                        </td>
-                        <td>
                             <div md-color-picker ng-model="centile.color" ng-change="cctrl.applyData()"></div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </form>
-    </md-content>
+                        </md-list-item>
+                    </md-list>
+                </md-content>
+                <md-content>
+                    <md-input-container>
+                        <md-button md-no-ink class="md-primary" ng-click="cctrl.saveChart()">Save</md-button>
+                        <md-button md-no-ink class="md-primary" ng-click="cctrl.snap()">Screenshot</md-button>
+                    </md-input-container>
+                </md-content>
+            </form>
+        </md-content>
+    </div>
+
+    <md-button class="md-fab md-fab md-fab-bottom-left md-faded" aria-label="Add Chart" ng-click="ctrl.new()"
+               style="position: fixed">
+        <md-icon>
+            <i class="material-icons">navigate_before</i>
+        </md-icon>
+    </md-button>
+    <md-button class="md-fab md-fab md-fab-bottom-right md-primary" aria-label="Add Chart" ng-click="ctrl.new()"
+               style="position: fixed">
+        <md-icon>
+            <i class="material-icons">save</i>
+        </md-icon>
+    </md-button>
 </div>

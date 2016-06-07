@@ -1,5 +1,37 @@
 <div ng-controller="DashboardController as ctrl">
-    <md-button class="md-fab md-fab md-fab-bottom-right md-primary" aria-label="Add Chart" ng-click="ctrl.show()">
+    <md-content layout-padding>
+        <md-grid-list md-cols-lg="12" md-cols-gt-lg="15" md-cols-xs="3" md-cols-sm="6" md-cols-md="9"
+                      md-row-height-gt-md="1:1" md-row-height-md="1:1" md-row-height="1:2" md-gutter-gt-md="16px"
+                      md-gutter-md="8px" md-gutter="4px">
+            <md-grid-tile ng-repeat="chart in ctrl.charts" md-colspan="3" md-rowspan-gt-sm="3" md-rowspan-gt-xs="2">
+                <md-card class="chart-card">
+                    <div class="thumbnail-wrapper">
+                        <img ng-src="{{chart.img}}" class="md-card-image" alt="Washed Out">
+                    </div>
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">{{chart.title}}</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content>
+                        <p>
+                            
+                        </p>
+                    </md-card-content>
+                    <md-card-actions layout="row" layout-align="end right">
+                        <md-switch ng-model="chart.enabled" aria-label="Enable Chart">
+                        </md-switch>
+                        <md-button class="md-fab md-mini md-primary" aria-label="Edit">
+                            <md-icon md-svg-src="img/ic_mode_edit_white_24px.svg"></md-icon>
+                        </md-button>
+                    </md-card-actions>
+                </md-card>
+            </md-grid-tile>
+        </md-grid-list>
+    </md-content>
+
+    <md-button class="md-fab md-fab md-fab-bottom-right md-primary" aria-label="Add Chart" ng-click="ctrl.new()"
+               style="position: fixed">
         <md-icon>
             <i class="material-icons">add</i>
         </md-icon>
