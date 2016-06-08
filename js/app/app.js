@@ -1,11 +1,11 @@
 var app = angular.module('long-charts', ['ngMaterial', 'ngRoute', 'longitudinalChartControllers', 'dropzone', 'chart.js', 'mdColorPicker']);
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {
-        templateUrl: 'templates/dashboard.html',
-        controller: 'DashboardController'
+        templateUrl: 'templates/dashboard.html'
     }).when('/new', {
-        templateUrl: 'templates/new-chart.html',
-        controller: 'ChartController'
+        templateUrl: 'templates/new-chart.html'
+    }).when('/chart/:id', {
+        templateUrl: 'templates/new-chart.html'
     }).otherwise({
         redirectTo: '/'
     });
@@ -36,10 +36,19 @@ angular.module('dropzone', []).directive('dropzone', function () {
  * Chart Service
  **/
 app.factory('chartService', function ($http, $q) {
-    return {
+    var chartService = {
         saveChart: function (chart) {
             var defer = $q.defer();
             $http.post('../../dataStore/lc/' + chart.id, angular.toJson(chart)).then(function (response) {
+                defer.resolve(response.data);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
+        deleteChart: function (chart) {
+            var defer = $q.defer();
+            $http.delete('../../dataStore/lc/' + chart.id).then(function (response) {
                 defer.resolve(response.data);
             }, function (response) {
                 defer.reject(response);
@@ -74,6 +83,7 @@ app.factory('chartService', function ($http, $q) {
             return defer.promise;
         }
     }
+    return chartService;
 });
 
 app.factory('validationService', function () {

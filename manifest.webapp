@@ -1,15 +1,15 @@
 {
   "version": "0.0.1",
   "name": "Tracker Longitudinal Charts",
-  "description": "Responsive Web application for easy visualization of standard data",
+  "description": "Responsive Web application for easy visualization of longitudinal data",
   "icons": {
-    "16": "/img/icons/raptor-16.png",
-    "48": "/img/icons/raptor-48.png",
-    "128": "/img/icons/raptor-128.png"
+    "16": "/img/icons/chart-36.png",
+    "48": "/img/icons/chart-48.png",
+    "128": "/img/icons/chart-192.png"
   },
   "developer": {
-    "url": "http://www.dhis2.org",
-    "name": "Bendik Kvamstad, Stian Lind Petlund, Kristian Saksvik Munkvold, Martin Holøs",
+    "url": "http://www.cwidanage.com",
+    "name": "Chathura Widanage",
     "company": null,
     "email": null
   },

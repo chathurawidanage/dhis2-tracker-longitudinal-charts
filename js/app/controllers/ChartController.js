@@ -1,14 +1,25 @@
 /**
  * Created by chathura on 6/1/16.
  */
-function ChartController($document, $scope, programService, chartService, toastService, validationService) {
+function ChartController($location, $routeParams, $scope, programService, chartService, toastService, validationService) {
     var ctrl = this;
 
     this.lc = new LongitudinalChart();
+    if ($routeParams.id) {
+        var chartId = $routeParams.id;
+        chartService.getChart(chartId).then(function (chart) {
+            ctrl.lc = chart;
+            ctrl.refreshDataElements();
+        })
+    }
 
     this.programs = [];
     this.dataElements = [];
     this.xAxisPeriods = ["Daily", "Weekly", "Monthly", "Yearly"];
+
+    this.navBack = function () {
+        $location.path("/");
+    }
 
     this.previewAvailable = function () {
         return this.lc.data.length > 0;
@@ -16,7 +27,6 @@ function ChartController($document, $scope, programService, chartService, toastS
 
     this.snap = function () {
         var canvas = document.getElementById('chart-preview');
-        console.log(canvas);
         var img = canvas.toDataURL("png");
         return img;
     }
@@ -24,7 +34,18 @@ function ChartController($document, $scope, programService, chartService, toastS
     this.saveChart = function () {
         this.validateChart(function () {
             chartService.saveChart(ctrl.lc).then(function (resp) {
-                console.log(resp);
+                if (resp.httpStatusCode == 201) {
+                    ctrl.navBack();
+                    toastService.showToast("Chart saved!");
+                }
+            }, function (error) {
+                //handle updates
+                if (error.status == 409) {
+                    chartService.deleteChart(ctrl.lc).then(function () {
+                        console.info("Chart deleted");
+                        ctrl.saveChart();
+                    })
+                }
             });
         });
     }
@@ -55,7 +76,8 @@ function ChartController($document, $scope, programService, chartService, toastS
     /*Drop zone*/
     $scope.dropzoneConfig = {
         'options': { // passed into the Dropzone constructor
-            'url': '#'
+            'url': '#',
+            'dictDefaultMessage': 'Drop CSV file here'
         },
         'eventHandlers': {
             'sending': function (file, xhr, formData) {
@@ -70,10 +92,8 @@ function ChartController($document, $scope, programService, chartService, toastS
                     ctrl.loadDataFromCSV(csvData);
                 };
                 reader.readAsText(file);
-                console.log(file);
             }
         },
-        'previewTemplate': '<div class="dz-preview dz-file-preview"> <div class="dz-details"> <div class="dz-filename"><span data-dz-name></span></div> <div class="dz-size" data-dz-size></div> <img data-dz-thumbnail /> </div> <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress></span></div> <div class="dz-success-mark"><span>✔</span></div> <div class="dz-error-mark"><span>✘</span></div> <div class="dz-error-message" style="display:none"><span data-dz-errormessage></span></div> </div>'
     };
 
     ctrl.loadDataFromCSV = function (csvData) {
@@ -114,15 +134,20 @@ function ChartController($document, $scope, programService, chartService, toastS
         var selectedSeries = [];
         var selectedDataColors = [];
 
+        var maxDataLength = 0;
         ctrl.lc.centiles.forEach(function (centile) {
             if (centile.selected) {
                 selectedData.push(centile.data);
+                maxDataLength = maxDataLength < centile.data.length ? centile.data.length : maxDataLength;
                 selectedSeries.push(centile.name);
                 selectedDataColors.push(centile.color);
             }
         });
 
-        ctrl.lc.labels = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        ctrl.lc.labels = [];
+        for (var i = 0; i < maxDataLength; i++) {
+            ctrl.lc.labels.push(i + 1);
+        }
         ctrl.lc.series = selectedSeries;
         ctrl.lc.data = selectedData;
         ctrl.lc.dataColors = selectedDataColors;

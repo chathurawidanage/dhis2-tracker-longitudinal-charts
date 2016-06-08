@@ -5,7 +5,7 @@ function DashboardController($location, $scope, toastService, chartService, prog
     var ctrl = this;
     this.charts = [];
 
-    ctrl.loadCharts = function () {
+    this.loadCharts = function () {
         chartService.getAllIds().then(function (ids) {
             ids.forEach(function (id) {
                 chartService.getChart(id).then(function (chart) {
@@ -15,16 +15,21 @@ function DashboardController($location, $scope, toastService, chartService, prog
         });
     }
 
-    ctrl.getProgramName = function (programId) {
-       /* return programService.getProgramNameById(programId).then(function (name) {
-            console.log(name);
-            return name;
-        })*/
+    this.loadCharts();//load charts
+
+    this.editChart = function (chartId) {
+        $location.path("/chart/" + chartId);
+    }
+
+    this.getProgramName = function (programId) {
+        /* return programService.getProgramNameById(programId).then(function (name) {
+         console.log(name);
+         return name;
+         })*/
     };
 
-    ctrl.loadCharts();
 
-    ctrl.new = function () {
+    this.new = function () {
         $location.path('/new');
     }
 }

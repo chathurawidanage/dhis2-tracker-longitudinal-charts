@@ -47,39 +47,37 @@
                     <span class="md-headline">Reference Data</span>
                 </md-content>
                 <md-content>
-                    <div dropzone="dropzoneConfig"
-                         style="background-color: #fafafa;width: 100%;height: 60px;overflow: hidden;text-align: center;line-height: 60px">
-                        Drop CSV file here
+                    <div dropzone="dropzoneConfig" class="drop-zone">
+                        <div class="dz-message">
+                            Drop reference data(CSV) here.
+                        </div>
                     </div>
                 </md-content>
                 <md-content>
-                    <md-list flex>
-                        <md-list-item class="md-3-line md-long-text" ng-repeat="centile in cctrl.lc.centiles">
-                            <md-switch ng-model="centile.selected"
-                                         ng-change="cctrl.applyData()" aria-label="enable">
+                    <md-list class="fixedRows">
+                        <md-list-item class="md-2-line centile-item" ng-repeat="centile in cctrl.lc.centiles">
+                            <div md-color-picker ng-model="centile.color" ng-change="cctrl.applyData()"
+                                 class="md-avatar"></div>
+                            <div class="md-list-item-text compact">
                                 <h3> {{centile.name}}</h3>
-                            </md-switch>
-                            <div md-color-picker ng-model="centile.color" ng-change="cctrl.applyData()"></div>
+                                <md-switch ng-model="centile.selected"
+                                           ng-change="cctrl.applyData()" aria-label="enable">
+                                </md-switch>
+                            </div>
                         </md-list-item>
                     </md-list>
-                </md-content>
-                <md-content>
-                    <md-input-container>
-                        <md-button md-no-ink class="md-primary" ng-click="cctrl.saveChart()">Save</md-button>
-                        <md-button md-no-ink class="md-primary" ng-click="cctrl.snap()">Screenshot</md-button>
-                    </md-input-container>
                 </md-content>
             </form>
         </md-content>
     </div>
 
-    <md-button class="md-fab md-fab md-fab-bottom-left md-faded" aria-label="Add Chart" ng-click="ctrl.new()"
+    <md-button class="md-fab md-fab md-fab-bottom-left md-faded" aria-label="Add Chart" ng-click="cctrl.navBack()"
                style="position: fixed">
         <md-icon>
             <i class="material-icons">navigate_before</i>
         </md-icon>
     </md-button>
-    <md-button class="md-fab md-fab md-fab-bottom-right md-primary" aria-label="Add Chart" ng-click="ctrl.new()"
+    <md-button class="md-fab md-fab md-fab-bottom-right md-primary" aria-label="Add Chart" ng-click="cctrl.saveChart()"
                style="position: fixed">
         <md-icon>
             <i class="material-icons">save</i>

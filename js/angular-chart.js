@@ -111,7 +111,6 @@
           // Order of setting "watch" matter
 
           scope.$watch('chartData', function (newVal, oldVal) {
-            console.log("data changed");
             if (! newVal || ! newVal.length || (Array.isArray(newVal[0]) && ! newVal[0].length)) {
               destroyChart(chart, scope);
               return;
@@ -252,7 +251,6 @@
     }
 
     function getDarkerShade(color) {
-        console.log(color);
         var darkerColor=[];
         color.forEach(function (comp) {
             darkerColor.push(Math.floor(comp*0.8))

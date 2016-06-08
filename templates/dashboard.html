@@ -1,4 +1,4 @@
-<div ng-controller="DashboardController as ctrl">
+<div ng-controller="DashboardController as ctrl" class="dashboard">
     <md-content layout-padding>
         <md-grid-list md-cols-lg="12" md-cols-gt-lg="15" md-cols-xs="3" md-cols-sm="6" md-cols-md="9"
                       md-row-height-gt-md="1:1" md-row-height-md="1:1" md-row-height="1:2" md-gutter-gt-md="16px"
@@ -21,7 +21,7 @@
                     <md-card-actions layout="row" layout-align="end right">
                         <md-switch ng-model="chart.enabled" aria-label="Enable Chart">
                         </md-switch>
-                        <md-button class="md-fab md-mini md-primary" aria-label="Edit">
+                        <md-button class="md-fab md-mini md-primary" aria-label="Edit" ng-click="ctrl.editChart(chart.id)">
                             <md-icon md-svg-src="img/ic_mode_edit_white_24px.svg"></md-icon>
                         </md-button>
                     </md-card-actions>
