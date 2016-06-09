@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
-  "name": "Tracker Longitudinal Charts",
+  "name": "Longitudinal Charts",
   "description": "Responsive Web application for easy visualization of longitudinal data",
   "icons": {
     "16": "/img/icons/chart-36.png",

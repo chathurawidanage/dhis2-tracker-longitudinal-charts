@@ -45,7 +45,17 @@ div[md-color-picker] .md-color-picker-preview {
 
 .centile-item {
   float: left;
-  width: 33%; }
+  width: 25%; }
+  .centile-item md-switch {
+    margin: 0 !important; }
+  .centile-item .md-list-item-text {
+    margin-left: 10px; }
+  .centile-item .md-color-picker-input-container {
+    width: 60px;
+    margin-top: -18px; }
+    .centile-item .md-color-picker-input-container .md-color-picker-preview {
+      width: 40px !important;
+      height: 40px !important; }
 
 .thumbnail-wrapper {
   overflow: hidden;
@@ -61,5 +71,8 @@ div[md-color-picker] .md-color-picker-preview {
 
 .dashboard {
   background-color: #fafafa; }
+
+.md-green {
+  background-color: #4CAF50 !important; }
 
 /*# sourceMappingURL=style.css.map */

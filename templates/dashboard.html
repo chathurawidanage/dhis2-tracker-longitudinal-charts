@@ -24,6 +24,16 @@
                         <md-button class="md-fab md-mini md-primary" aria-label="Edit" ng-click="ctrl.editChart(chart.id)">
                             <md-icon md-svg-src="img/ic_mode_edit_white_24px.svg"></md-icon>
                         </md-button>
+                        <md-button class="md-fab md-mini md-danger" aria-label="Delete" ng-click="ctrl.deleteChart(chart)">
+                            <md-icon>
+                                <i class="material-icons">delete</i>
+                            </md-icon>
+                        </md-button>
+                        <md-button class="md-fab md-mini md-green" aria-label="Delete" ng-click="ctrl.duplicateChart(chart)">
+                            <md-icon>
+                                <i class="material-icons">content_copy</i>
+                            </md-icon>
+                        </md-button>
                     </md-card-actions>
                 </md-card>
             </md-grid-tile>

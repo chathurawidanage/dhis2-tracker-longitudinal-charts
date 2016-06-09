@@ -117,7 +117,7 @@ app.factory('userService', function ($http, $q) {
 /**
  * Toast Service
  **/
-app.factory('toastService', function ($mdToast) {
+app.factory('toastService', function ($mdToast,$mdDialog) {
     return {
         showToast: function (msg) {
             $mdToast.show(
@@ -126,6 +126,18 @@ app.factory('toastService', function ($mdToast) {
                     .position('bottom left')
                     .hideDelay(3000)
             );
+        },
+        showConfirm: function (title, description, ok, cancel, callbackSuccess, callbackCancel) {
+            var confirm = $mdDialog.confirm()
+                .title(title)
+                .textContent(description)
+                .ok(ok)
+                .cancel(cancel);
+            $mdDialog.show(confirm).then(function () {
+                callbackSuccess();
+            }, function () {
+                callbackCancel();
+            });
         }
     }
 });
@@ -153,6 +165,16 @@ app.factory('programService', function ($http, $q) {
             });
             return defer.promise;
         },
+        getProgramIndicators: function (programId) {
+            var defer = $q.defer();
+            var url = "../../programs/" + programId + ".json?fields=programIndicators[name,id]";
+            $http.get(url).then(function (response) {
+                defer.resolve(response.data.programIndicators);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
         getProgramDataElements: function (programId) {
             var defer = $q.defer();
             var url = "../../programs/" + programId + ".json?fields=programStages[programStageDataElements[dataElement[name,id]]]";
@@ -160,7 +182,7 @@ app.factory('programService', function ($http, $q) {
                 var programStages = response.data.programStages;
                 var dataElements = [];
                 var dataElementIds = [];
-                programStages.forEach(function (programStage) {
+                programStages.forEach(function (programStage) {//to avoid duplicates
                     var programStageDataElements = programStage.programStageDataElements;
                     programStageDataElements.forEach(function (programStageDataElement) {
                         var dataElement = programStageDataElement.dataElement;

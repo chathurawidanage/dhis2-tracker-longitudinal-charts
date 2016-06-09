@@ -9,12 +9,13 @@ function ChartController($location, $routeParams, $scope, programService, chartS
         var chartId = $routeParams.id;
         chartService.getChart(chartId).then(function (chart) {
             ctrl.lc = chart;
-            ctrl.refreshDataElements();
+            ctrl.refreshDependants();
         })
     }
 
     this.programs = [];
     this.dataElements = [];
+    this.programIndicators=[];
     this.xAxisPeriods = ["Daily", "Weekly", "Monthly", "Yearly"];
 
     this.navBack = function () {
@@ -23,6 +24,17 @@ function ChartController($location, $routeParams, $scope, programService, chartS
 
     this.previewAvailable = function () {
         return this.lc.data.length > 0;
+    }
+
+    this.getDependantLabel = function () {
+        switch (ctrl.lc.dependantDataType) {
+            case 0:
+                return "Dependant Data Element";
+            case 1:
+                return "Dependant Data Element II";
+            case 2:
+                return "Dependant Program Indicator";
+        }
     }
 
     this.snap = function () {
@@ -64,8 +76,21 @@ function ChartController($location, $routeParams, $scope, programService, chartS
         }
     }
 
+    this.refreshDependants=function () {
+        this.refreshDataElements();
+        this.refreshProgramIndicators();
+    }
+
+    this.refreshProgramIndicators = function () {
+        programService.getProgramIndicators(ctrl.lc.program).then(function (programIndicators) {
+            ctrl.programIndicators = programIndicators;
+            console.log(ctrl.programIndicators);
+        }).catch(function () {
+            console.log("Error in fetching data elements for " + ctrl.program)
+        })
+    }
+
     this.refreshDataElements = function () {
-        ctrl.yAxisDataElement = undefined;
         programService.getProgramDataElements(ctrl.lc.program).then(function (dataElements) {
             ctrl.dataElements = dataElements;
         }).catch(function () {
@@ -177,10 +202,12 @@ function ChartController($location, $routeParams, $scope, programService, chartS
         this.id;
         this.title;//title of the chart
         this.program;//program Id
-        this.yAxisDataElement;
+        this.yAxisVariable1;
+        this.yAxisVariable2;
         this.xAxisPeriod;
         this.centiles = [];
         this.img;
+        this.dependantDataType = 0;
 
         this.enabled = false;
 

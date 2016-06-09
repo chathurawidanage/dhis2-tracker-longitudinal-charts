@@ -6,6 +6,7 @@ function DashboardController($location, $scope, toastService, chartService, prog
     this.charts = [];
 
     this.loadCharts = function () {
+        ctrl.charts = [];
         chartService.getAllIds().then(function (ids) {
             ids.forEach(function (id) {
                 chartService.getChart(id).then(function (chart) {
@@ -16,6 +17,38 @@ function DashboardController($location, $scope, toastService, chartService, prog
     }
 
     this.loadCharts();//load charts
+
+    this.duplicateChart = function (chart) {
+        var copy = JSON.parse(JSON.stringify(chart));
+        copy.title=copy.title+" (Copy)";
+        copy.enabled=false;
+        chartService.generateId().then(function (resp) {
+            copy.id = resp.codes[0];
+            chartService.saveChart(copy).then(function (resp) {
+                if (resp.httpStatusCode == 201) {
+                    toastService.showToast("Chart duplicated.");
+                    ctrl.loadCharts();
+                }
+            });
+        });
+    }
+
+    this.deleteChart = function (chart) {
+        toastService.showConfirm(
+            "Do you really want to delete " + chart.title,
+            "This will delete chart including the reference data. This action can;t be recovered.",
+            "Delete",
+            "Cancel",
+            function () {
+                chartService.deleteChart(chart).then(function (response) {
+                    if (response.httpStatusCode == 200) {
+                        toastService.showToast(chart.title + " deleted.");
+                        ctrl.loadCharts();
+                    }
+                })
+            }
+        )
+    }
 
     this.editChart = function (chartId) {
         $location.path("/chart/" + chartId);
