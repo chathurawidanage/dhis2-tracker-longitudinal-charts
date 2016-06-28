@@ -1,5 +1,5 @@
 {
-  "version": "0.0.1",
+  "version": "0.0.2",
   "name": "Longitudinal Charts",
   "description": "Responsive Web application for easy visualization of longitudinal data",
   "icons": {
@@ -15,11 +15,13 @@
   },
   "activities": {
     "dhis": {
-      "href": "*"
+      "href": "*",
+        "trackerEndPoint":"trackerEndPoint"
     }
   },
   "launchUrl": null,
   "launch_path": "index.html#/",
   "installs_allowed_from": null,
-  "default_locale": "en"
+  "default_locale": "en",
+  "trackerEndPoint":"trackerEndPoint"
 }

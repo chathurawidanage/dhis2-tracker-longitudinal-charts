@@ -6,6 +6,8 @@ app.config(['$routeProvider', function ($routeProvider) {
         templateUrl: 'templates/new-chart.html'
     }).when('/chart/:id', {
         templateUrl: 'templates/new-chart.html'
+    }).when('/trackerEndPoint', {
+        templateUrl: 'templates/view.html'
     }).otherwise({
         redirectTo: '/'
     });
@@ -14,6 +16,7 @@ var controllers = angular.module('longitudinalChartControllers', []);
 
 controllers.controller('DashboardController', DashboardController);
 controllers.controller('ChartController', ChartController);
+controllers.controller('ViewerController', ViewerController);
 
 /*Drop Zone*/
 angular.module('dropzone', []).directive('dropzone', function () {
