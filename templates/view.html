@@ -9,8 +9,7 @@
             <md-tab ng-repeat="chart in ctrl.charts"
                     ng-disabled="chart.disabled"
                     label="{{chart.title}}">
-                {{chart.dso}}
-                <div class="demo-tab tab{{$index%4}}" style="padding: 25px; text-align: center;">
+                <div  style="padding: 25px; text-align: center;">
                    <canvas class="chart chart-line" chart-data="chart.data" chart-labels="chart.labels"
                     chart-series="chart.series" chart-colors="chart.dataColors" chart-options="chart.options"
                            chart-dataset-override="chart.dso"

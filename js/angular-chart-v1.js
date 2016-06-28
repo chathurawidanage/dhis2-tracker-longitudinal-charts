@@ -249,12 +249,20 @@
         function getColor (color) {
             return {
                 backgroundColor: rgba(color, 1),//0.2
-                pointBackgroundColor: rgba(color, 1),
+                pointBackgroundColor: rgba(getDarkerShade(color), 1),
                 pointHoverBackgroundColor: rgba(color, 0.8),
                 borderColor: rgba(color, 1),
                 pointBorderColor: '#fff',
                 pointHoverBorderColor: rgba(color, 1)
             };
+        }
+
+        function getDarkerShade(color) {
+            var darkerColor = [];
+            color.forEach(function (comp) {
+                darkerColor.push(Math.floor(comp * 0.8))
+            });
+            return darkerColor;
         }
 
         function getRandomInt (min, max) {

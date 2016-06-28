@@ -29,9 +29,19 @@ function ViewerController($location, $scope, $routeParams, toastService, chartSe
             yAxisObj.scaleLabel.labelString = "Test label";
             chart.options.scales.yAxes.push(yAxisObj);
 
+            //adding patient data
+            chart.series.unshift("test");
+            chart.dataColors.unshift("#000000");
+            chart.data.unshift([
+                "5",null,"7",null,null,"5","6","8","5"
+            ]);
 
 
-            chart.dso = [{fill: false}, {},{},{},{},{},{},{},{},{}];
+
+
+
+            chart.dso = [{fill: false,label: 'Override Series B',borderWidth: 4,borderDash:[5,15],borderColor:"white",skipNullValues: true}
+            ];
 
             console.log(chart);
         });
