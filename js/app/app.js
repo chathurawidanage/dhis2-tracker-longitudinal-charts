@@ -84,6 +84,29 @@ app.factory('chartService', function ($http, $q) {
                 defer.reject(response);
             });
             return defer.promise;
+        },
+        getAllCharts:function () {
+            var defer = $q.defer();
+            this.getAllIds().then(function (ids) {
+                var charts=[];
+                var chartCount=ids.length;
+                var resolvedCharts=0;
+                ids.forEach(function (id) {//sending simultaneous requests
+                    chartService.getChart(id).then(function (chart) {
+                        chart.series.unshift("test");
+                        chart.dataColors.unshift("#000000");
+                        chart.data.unshift([
+                            "5","6","7",null,null,"5","6","8","5"
+                        ]);
+                        charts.push(chart);
+                        resolvedCharts++;
+                        if(resolvedCharts==chartCount){
+                            defer.resolve(charts);
+                        }
+                    })
+                })
+            });
+            return defer.promise;
         }
     }
     return chartService;

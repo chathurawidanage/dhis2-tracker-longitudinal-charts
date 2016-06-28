@@ -1,9 +1,23 @@
 <div ng-controller="ViewerController as ctrl" class="dashboard">
-    <md-content layout-padding>
+    <md-content layout-padding><!--
         <h1>This is a demo end point</h1>
         <h2>Following params received from tracker</h2>
         <p>TEI : {{ctrl.tei}}</p>
-        <p>Program : {{ctrl.program}}</p>
+        <p>Program : {{ctrl.program}}</p>-->
+
+        <md-tabs md-selected="selectedIndex" md-border-bottom md-autoselect  md-dynamic-height>
+            <md-tab ng-repeat="chart in ctrl.charts"
+                    ng-disabled="chart.disabled"
+                    label="{{chart.title}}">
+                {{chart.dso}}
+                <div class="demo-tab tab{{$index%4}}" style="padding: 25px; text-align: center;">
+                   <canvas class="chart chart-line" chart-data="chart.data" chart-labels="chart.labels"
+                    chart-series="chart.series" chart-colors="chart.dataColors" chart-options="chart.options"
+                           chart-dataset-override="chart.dso"
+                    id="chart-preview"></canvas>
+                </div>
+            </md-tab>
+        </md-tabs>
 
     </md-content>
 </div>

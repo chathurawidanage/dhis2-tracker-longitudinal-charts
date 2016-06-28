@@ -6,13 +6,8 @@ function DashboardController($location, $scope, toastService, chartService, prog
     this.charts = [];
 
     this.loadCharts = function () {
-        ctrl.charts = [];
-        chartService.getAllIds().then(function (ids) {
-            ids.forEach(function (id) {
-                chartService.getChart(id).then(function (chart) {
-                    ctrl.charts.push(chart);
-                })
-            })
+        chartService.getAllCharts().then(function (charts) {
+            ctrl.charts=charts;
         });
     }
 
