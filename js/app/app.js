@@ -164,6 +164,40 @@ app.factory('toastService', function ($mdToast,$mdDialog) {
 });
 
 /**
+ * DHIS Program Indicators
+ */
+app.factory('programIndicatorsService',function ($http,$q) {
+    return{
+        getProgramIndicatorNameById:function (programIndicatorId) {
+            var defer = $q.defer();
+            $http.get("../../programIndicators/" + programIndicatorId + ".json?fields=name").then(function (response) {
+                defer.resolve(response.data.name);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        }
+    }
+})
+
+/**
+ * DHIS DataElements
+ */
+app.factory('dataElementService',function ($http,$q) {
+    return{
+        getDataElementNameById:function (dataElementId) {
+            var defer = $q.defer();
+            $http.get("../../dataElements/" + dataElementId + ".json?fields=name").then(function (response) {
+                defer.resolve(response.data.name);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        }
+    }
+})
+
+/**
  * Program Service handles all the request related to DHIS Programs
  **/
 app.factory('programService', function ($http, $q) {

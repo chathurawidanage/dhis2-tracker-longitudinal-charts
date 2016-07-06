@@ -15,8 +15,8 @@ function ChartController($location, $routeParams, $scope, programService, chartS
 
     this.programs = [];
     this.dataElements = [];
-    this.programIndicators=[];
-    this.xAxisPeriods = ["Daily", "Weekly", "Monthly", "Yearly"];
+    this.programIndicators = [];
+    this.xAxisPeriods = intervals;
 
     this.navBack = function () {
         $location.path("/");
@@ -76,7 +76,7 @@ function ChartController($location, $routeParams, $scope, programService, chartS
         }
     }
 
-    this.refreshDependants=function () {
+    this.refreshDependants = function () {
         this.refreshDataElements();
         this.refreshProgramIndicators();
     }
@@ -128,10 +128,20 @@ function ChartController($location, $routeParams, $scope, programService, chartS
 
         //first row is centile names, remove it
         var centileNames = rows.splice(0, 1).toString().split(",");
-        centileNames.forEach(function (centileName) {
-            var c = new Centile();
-            c.name = centileName;
-            ctrl.lc.centiles.push(c);
+        centileNames.forEach(function (centileName, i) {
+            if (i != 0) {//first on is the time interval
+                var c = new Centile();
+                c.name = centileName;
+                ctrl.lc.centiles.push(c);
+            } else {//trying to smart fill the referenceData interval
+                //todo better algo
+                var char = centileName.toLowerCase().charAt(0);
+                intervals.forEach(function (name, index) {
+                    if (name.toLowerCase().charAt(0) == char) {
+                        ctrl.lc.xAxisPeriod = index;
+                    }
+                })
+            }
         });
 
         rows.forEach(function (row, i) {
@@ -139,8 +149,15 @@ function ChartController($location, $routeParams, $scope, programService, chartS
                 return;
             }
             var separatedValues = row.split(",");
+
             separatedValues.forEach(function (value, j) {
-                ctrl.lc.centiles[i].data[j] = value;
+                if (j != 0) {//skip dependant variable value
+                    //ctrl.lc.centiles[j - 1].data[i] = value;
+                    ctrl.lc.centiles[j - 1].data.push({
+                        x:i,
+                        y:value
+                    });
+                }
             });
         });
         ctrl.applyDataFromCSV();
@@ -163,6 +180,7 @@ function ChartController($location, $routeParams, $scope, programService, chartS
         ctrl.lc.centiles.forEach(function (centile) {
             if (centile.selected) {
                 selectedData.push(centile.data);
+                console.log(centile.data);
                 maxDataLength = maxDataLength < centile.data.length ? centile.data.length : maxDataLength;
                 selectedSeries.push(centile.name);
                 selectedDataColors.push(centile.color);
@@ -187,34 +205,4 @@ function ChartController($location, $routeParams, $scope, programService, chartS
     }).catch(function () {
         console.log("error in loading programs");
     });
-
-    /**
-     * Local modals
-     * */
-    function Centile() {
-        this.name;
-        this.data = [];
-        this.color = '#' + (Math.random() * 0xFFFFFF << 0).toString(16);
-        this.selected = true;
-    }
-
-    function LongitudinalChart() {
-        this.id;
-        this.title;//title of the chart
-        this.program;//program Id
-        this.yAxisVariable1;
-        this.yAxisVariable2;
-        this.xAxisPeriod;
-        this.centiles = [];
-        this.img;
-        this.dependantDataType = 0;
-
-        this.enabled = false;
-
-        //graphical configurations
-        this.labels = [];
-        this.series = [];
-        this.data = [];
-        this.dataColors = [];
-    }
 }

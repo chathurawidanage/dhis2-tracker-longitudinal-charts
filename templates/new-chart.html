@@ -8,7 +8,7 @@
             <div>
                 <img src="img/nopreview.jpg" ng-if="!cctrl.previewAvailable()">
                 <canvas class="chart chart-line" chart-data="cctrl.lc.data" chart-labels="cctrl.lc.labels"
-                        chart-series="cctrl.lc.series" chart-colors="cctrl.lc.dataColors"
+                        chart-series="cctrl.lc.series" chart-colors="cctrl.lc.dataColors" chart-options="cctrl.lc.options"
                         id="chart-preview"></canvas>
             </div>
             <div>
@@ -51,8 +51,8 @@
                 </md-content>
                 <md-content layout="row">
                     <md-input-container flex="50">
-                        <label ng-if="cctrl.lc.dependantDataType==0">Dependant Data Element</label>
-                        <label ng-if="cctrl.lc.dependantDataType==1">Dependant Data Element I</label>
+                        <label ng-if="cctrl.lc.dependantDataType==0">Dependant Data Element </label>
+                        <label ng-if="cctrl.lc.dependantDataType==1">Dependant Data Element I (Y)</label>
                         <label ng-if="cctrl.lc.dependantDataType==2">Dependant Program Indicator</label>
                         <md-select ng-model="cctrl.lc.yAxisVariable1">
                             <md-option ng-if="cctrl.lc.dependantDataType<2" ng-repeat="de in cctrl.dataElements" value="{{de.id}}">
@@ -64,7 +64,7 @@
                         </md-select>
                     </md-input-container>
                     <md-input-container flex="50" ng-if="cctrl.lc.dependantDataType==1">
-                        <label>Dependant Data Element II</label>
+                        <label>Dependant Data Element II (X)</label>
                         <md-select ng-model="cctrl.lc.yAxisVariable2">
                             <md-option ng-repeat="de in cctrl.dataElements" value="{{de.id}}">
                                 {{de.name}}
