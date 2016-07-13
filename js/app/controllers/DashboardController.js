@@ -1,9 +1,27 @@
 /**
  * Created by chathura on 6/1/16.
  */
-function DashboardController($location, $scope, toastService, chartService, programService) {
+function DashboardController($location, $scope, toastService, chartService, appService,$mdDialog) {
     var ctrl = this;
     this.charts = [];
+
+    //loading settings/options
+    appService.getOptions().then(function (resp) {
+        console.log(resp);
+    },function (error) {
+        if(error.status==404){//this is the first run of the program
+            ctrl.showOptions();
+        }
+    })
+
+    this.showOptions=function () {
+        $mdDialog.show({
+            controller: OptionsController,
+            templateUrl: 'templates/options.dialog.html',
+            parent: angular.element(document.body),
+            clickOutsideToClose:true
+        });
+    }
 
     this.loadCharts = function () {
         chartService.getAllCharts().then(function (charts) {

@@ -17,6 +17,7 @@ var controllers = angular.module('longitudinalChartControllers', []);
 controllers.controller('DashboardController', DashboardController);
 controllers.controller('ChartController', ChartController);
 controllers.controller('ViewerController', ViewerController);
+controllers.controller('OptionsController', OptionsController);
 
 /*Drop Zone*/
 angular.module('dropzone', []).directive('dropzone', function () {
@@ -34,6 +35,70 @@ angular.module('dropzone', []).directive('dropzone', function () {
         });
     };
 });
+
+app.factory('appService', function ($http, $q) {
+    return {
+        getOptions: function () {//determines if this is the first run of the app -> need to show settings
+            var defer = $q.defer();
+            $http.get('../../dataStore/lc-app/options').then(function (response) {
+                defer.resolve(response.data);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
+        setOptions: function (options) {//determines if this is the first run of the app -> need to show settings
+            var defer = $q.defer();
+            $http.post('../../dataStore/lc-app/options', angular.toJson(options)).then(function (response) {
+                defer.resolve(response.data);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
+        updateOptions:function (options) {
+            var defer = $q.defer();
+            $http.put('../../dataStore/lc-app/options', angular.toJson(options)).then(function (response) {
+                defer.resolve(response.data);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        }
+    }
+});
+
+app.factory('teiService',function ($http,$q) {
+    return{
+        getAllTeiAttributes:function () {
+            var defer = $q.defer();
+            $http.get('../../trackedEntityAttributes').then(function (response) {
+                defer.resolve(response.data.trackedEntityAttributes);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
+        getDobPossibleTeiAttributes:function () {
+            var defer = $q.defer();
+            $http.get('../../trackedEntityAttributes.json?paging=false&filter=valueType:eq:DATE').then(function (response) {
+                defer.resolve(response.data.trackedEntityAttributes);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        },
+        getGenderPossibleTeiAttributes:function () {
+            var defer = $q.defer();
+            $http.get('../../trackedEntityAttributes.json?paging=false&filter=valueType:in:[TEXT,BOOLEAN]').then(function (response) {
+                defer.resolve(response.data.trackedEntityAttributes);
+            }, function (response) {
+                defer.reject(response);
+            });
+            return defer.promise;
+        }
+    }
+})
 
 /**
  * Chart Service
@@ -85,17 +150,17 @@ app.factory('chartService', function ($http, $q) {
             });
             return defer.promise;
         },
-        getAllCharts:function () {
+        getAllCharts: function () {
             var defer = $q.defer();
             this.getAllIds().then(function (ids) {
-                var charts=[];
-                var chartCount=ids.length;
-                var resolvedCharts=0;
+                var charts = [];
+                var chartCount = ids.length;
+                var resolvedCharts = 0;
                 ids.forEach(function (id) {//sending simultaneous requests
                     chartService.getChart(id).then(function (chart) {
                         charts.push(chart);
                         resolvedCharts++;
-                        if(resolvedCharts==chartCount){
+                        if (resolvedCharts == chartCount) {
                             defer.resolve(charts);
                         }
                     })
@@ -138,7 +203,7 @@ app.factory('userService', function ($http, $q) {
 /**
  * Toast Service
  **/
-app.factory('toastService', function ($mdToast,$mdDialog) {
+app.factory('toastService', function ($mdToast, $mdDialog) {
     return {
         showToast: function (msg) {
             $mdToast.show(
@@ -166,9 +231,9 @@ app.factory('toastService', function ($mdToast,$mdDialog) {
 /**
  * DHIS Program Indicators
  */
-app.factory('programIndicatorsService',function ($http,$q) {
-    return{
-        getProgramIndicatorNameById:function (programIndicatorId) {
+app.factory('programIndicatorsService', function ($http, $q) {
+    return {
+        getProgramIndicatorNameById: function (programIndicatorId) {
             var defer = $q.defer();
             $http.get("../../programIndicators/" + programIndicatorId + ".json?fields=name").then(function (response) {
                 defer.resolve(response.data.name);
@@ -183,9 +248,9 @@ app.factory('programIndicatorsService',function ($http,$q) {
 /**
  * DHIS DataElements
  */
-app.factory('dataElementService',function ($http,$q) {
-    return{
-        getDataElementNameById:function (dataElementId) {
+app.factory('dataElementService', function ($http, $q) {
+    return {
+        getDataElementNameById: function (dataElementId) {
             var defer = $q.defer();
             $http.get("../../dataElements/" + dataElementId + ".json?fields=name").then(function (response) {
                 defer.resolve(response.data.name);

@@ -11,6 +11,14 @@ var intervalNoun = ["Days", "Weeks", "Months", "Years"];
 /**
  * Local modals
  * */
+
+function Options(){
+    this.teiAttributes={//tracked entity instance attributes
+        dob:null,
+        gender:null
+    }
+}
+
 function Centile() {
     this.name;
     this.data = [];

@@ -1,7 +1,7 @@
 /**
  * Created by chathura on 6/1/16.
  */
-function ViewerController($location, $scope, $routeParams, toastService, chartService,
+function ViewerController($location, appService, $routeParams, toastService, chartService,
                           programService, dataElementService, programIndicatorsService) {
     var ctrl = this;
     this.tei = $routeParams.tei;
