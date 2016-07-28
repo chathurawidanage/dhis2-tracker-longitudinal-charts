@@ -75,4 +75,13 @@ div[md-color-picker] .md-color-picker-preview {
 .md-green {
   background-color: #4CAF50 !important; }
 
+#no-ref-msg {
+  text-align: center;
+  padding-top: 25px; }
+  #no-ref-msg i {
+    font-size: inherit !important; }
+
+#reference-data-list .md-fab {
+  margin-top: 22px; }
+
 /*# sourceMappingURL=style.css.map */

@@ -23,13 +23,13 @@ function DashboardController($location, $scope, toastService, chartService, appS
         });
     }
 
-    this.loadCharts = function () {
+    this.loadData = function () {
         chartService.getAllCharts().then(function (charts) {
             ctrl.charts=charts;
         });
     }
 
-    this.loadCharts();//load charts
+    this.loadData();//load charts
 
     this.duplicateChart = function (chart) {
         var copy = JSON.parse(JSON.stringify(chart));
@@ -40,7 +40,7 @@ function DashboardController($location, $scope, toastService, chartService, appS
             chartService.saveChart(copy).then(function (resp) {
                 if (resp.httpStatusCode == 201) {
                     toastService.showToast("Chart duplicated.");
-                    ctrl.loadCharts();
+                    ctrl.loadData();
                 }
             });
         });
@@ -56,7 +56,7 @@ function DashboardController($location, $scope, toastService, chartService, appS
                 chartService.deleteChart(chart).then(function (response) {
                     if (response.httpStatusCode == 200) {
                         toastService.showToast(chart.title + " deleted.");
-                        ctrl.loadCharts();
+                        ctrl.loadData();
                     }
                 })
             }

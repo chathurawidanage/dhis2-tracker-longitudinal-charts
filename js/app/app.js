@@ -1,4 +1,5 @@
-var app = angular.module('long-charts', ['ngMaterial', 'ngRoute', 'longitudinalChartControllers', 'dropzone', 'chart.js', 'mdColorPicker']);
+var app = angular.module('long-charts', ['ngMaterial', 'ngRoute', 'longitudinalChartControllers', 'dropzone', 'chart.js'
+    , 'mdColorPicker', 'lfNgMdFileInput']);
 app.config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {
         templateUrl: 'templates/dashboard.html'
@@ -18,6 +19,7 @@ controllers.controller('DashboardController', DashboardController);
 controllers.controller('ChartController', ChartController);
 controllers.controller('ViewerController', ViewerController);
 controllers.controller('OptionsController', OptionsController);
+controllers.controller('RefDataController', RefDataController);
 
 /*Drop Zone*/
 angular.module('dropzone', []).directive('dropzone', function () {
@@ -56,7 +58,7 @@ app.factory('appService', function ($http, $q) {
             });
             return defer.promise;
         },
-        updateOptions:function (options) {
+        updateOptions: function (options) {
             var defer = $q.defer();
             $http.put('../../dataStore/lc-app/options', angular.toJson(options)).then(function (response) {
                 defer.resolve(response.data);
@@ -68,9 +70,9 @@ app.factory('appService', function ($http, $q) {
     }
 });
 
-app.factory('teiService',function ($http,$q) {
-    return{
-        getAllTeiAttributes:function () {
+app.factory('teiService', function ($http, $q, appService) {
+    var teiService = {
+        getAllTeiAttributes: function () {
             var defer = $q.defer();
             $http.get('../../trackedEntityAttributes').then(function (response) {
                 defer.resolve(response.data.trackedEntityAttributes);
@@ -79,7 +81,12 @@ app.factory('teiService',function ($http,$q) {
             });
             return defer.promise;
         },
-        getDobPossibleTeiAttributes:function () {
+        /**
+         * Get attributes that can possibly be a Date of birth. After this filtering, user get a filtered list, so he can
+         * chose the correct one
+         * @returns {d|*}
+         */
+        getDobPossibleTeiAttributes: function () {
             var defer = $q.defer();
             $http.get('../../trackedEntityAttributes.json?paging=false&filter=valueType:eq:DATE').then(function (response) {
                 defer.resolve(response.data.trackedEntityAttributes);
@@ -88,7 +95,7 @@ app.factory('teiService',function ($http,$q) {
             });
             return defer.promise;
         },
-        getGenderPossibleTeiAttributes:function () {
+        getGenderPossibleTeiAttributes: function () {
             var defer = $q.defer();
             $http.get('../../trackedEntityAttributes.json?paging=false&filter=valueType:in:[TEXT,BOOLEAN]').then(function (response) {
                 defer.resolve(response.data.trackedEntityAttributes);
@@ -96,8 +103,117 @@ app.factory('teiService',function ($http,$q) {
                 defer.reject(response);
             });
             return defer.promise;
+        },
+        getBirthDay: function (teiId) {
+            var defer = $q.defer();
+            appService.getOptions().then(function (options) {
+                var dobAttributeId = options.teiAttributes.dob;
+                $http.get('../../trackedEntityInstances/' + teiId + '.json?fields=attributes').then(function (response) {
+                    var dob = null;
+                    response.data.attributes.forEach(function (attributeObj) {
+                        if (attributeObj.attribute == dobAttributeId) {
+                            dob = attributeObj.value;
+                        }
+                    });
+                    if (dob) {
+                        defer.resolve(new Date(dob));
+                    } else {
+                        //defer.resolve(new Date("2016-07-14"));
+                        defer.reject("Date of birth for this tracked entity instance is not specified.");
+                    }
+                }, function (response) {
+                    defer.reject("Error occurred while reading date of birth of the tei.");
+                });
+            });
+            return defer.promise;
+        },
+        getEventData: function (trackedEntityInstance, program) {
+            var defer = $q.defer();
+            $http.get('../../events.json?ouMode=ACCESSIBLE&skipPaging=true&trackedEntityInstance='
+                + trackedEntityInstance + "&program=" + program).then(function (response) {
+                var events = response.data.events;
+                defer.resolve(events);
+            });
+            return defer.promise;
+        },
+        getDateDiffInDays: function (date1, date2) {
+            return Math.floor((date1 - date2) / (1000 * 60 * 60 * 24 ));
+        },
+        /**
+         * @param chart chart object
+         * @param trackedEntityInstance id of the tei
+         * @return the data to be drawn in the chart as point objects {x:1.0,y:5}
+         */
+        getChartData: function (chart, trackedEntityInstance) {
+            var defer = $q.defer();
+            console.log("here");
+            this.getBirthDay(trackedEntityInstance).then(function (dob) {
+                var dateOfBirth = new Date(dob);
+                var intervalDays = intervalInDays[chart.xAxisPeriod];
+                var chartType = parseInt(chart.dependantDataType);//0 : one dataElement vs time, 1: dataElement vs dataElement, 3: programIndicator vs time
+                var yAxisVariable1 = chart.yAxisVariable1;
+                var yAxisVariable2 = chart.yAxisVariable2;
+                console.log("Pre req", dateOfBirth, intervalDays);
+                $http.get('../../events.json?ouMode=ACCESSIBLE&skipPaging=true&trackedEntityInstance='
+                    + trackedEntityInstance + "&program=" + chart.program).then(function (response) {
+                    var events = response.data.events;
+                    var dataToPlot = [];
+                    var maxTimeSpanInDays = 0;//the largest distance between the DOB and the data points available. The graph will be chosen depending on this
+                    var dataValues1 = [];
+                    var dataValues2 = [];
+                    events.forEach(function (event) {
+                        event.dataValues.forEach(function (dataValue) {
+                            var updatedDate = new Date(dataValue.lastUpdated);
+                            var timeFromBirth = teiService.getDateDiffInDays(updatedDate, dob);
+                            if (maxTimeSpanInDays < timeFromBirth) {
+                                maxTimeSpanInDays = timeFromBirth;
+                            }
+                            if (dataValue.dataElement == yAxisVariable1) {
+                                dataValues1.push(dataValue);
+                                /* console.log(dataValue);
+                                 var timePlot = Math.floor((updatedDate - dateOfBirth) / (1000 * 60 * 60 * 24 * intervalDays));
+                                 var plotObject = {
+                                 x: timePlot,
+                                 y: dataValue.value
+                                 }
+                                 dataToPlot.push(plotObject);
+                                 console.log(plotObject, updatedDate);*/
+                            } else if (chartType == 1 && dataValue.dataElement == yAxisVariable2) {
+                                dataValues2.push(dataValue);
+                            }
+                        })
+                    });
+                    //iterate over refData of chart to select most suitable chart
+                    var refDataCoverage = [];//store temp refData objects with coverage values
+                    chart.refData.forEach(function (refData, index) {
+                        var xAxisPeriod = parseInt(refData.xAxisPeriod);
+                        var daysPerThisPeriod = intervalInDays[xAxisPeriod];//how many days in this period, ie: 7 days for a week
+                        var totalDaysCoveredByChart = daysPerThisPeriod * (refData.centiles.length);
+                        if (totalDaysCoveredByChart >= maxTimeSpanInDays) {//we don't care about charts that can't cover the data
+                            refDataCoverage.push({
+                                index: index,
+                                coverage: totalDaysCoveredByChart
+                            })
+                        }
+                    });
+                    //sort by coverage, we have to select the graph with lowest coverage that can cover all the TEI data
+                    refDataCoverage.sort(function (a, b) {
+                        a.coverage - b.coverage;
+                    });
+                    var selectedRefData = chart.refData[refDataCoverage[0].index];
+
+
+                    defer.resolve(dataToPlot);
+                }, function (response) {
+                    defer.reject(response);
+                });
+            }, function (msg) {//no dob set
+                defer.reject(msg);
+            })
+            return defer.promise;
         }
     }
+    return teiService;
 })
 
 /**
@@ -167,6 +283,31 @@ app.factory('chartService', function ($http, $q) {
                 })
             });
             return defer.promise;
+        },
+        /**
+         *
+         * @param refData ReferenceData object
+         */
+        generateChartDataFromRefData: function (refData) {
+            var selectedData = [];
+            var selectedSeries = [];
+            var selectedDataColors = [];
+
+            var maxDataLength = 0;
+            refData.centiles.forEach(function (centile) {
+                if (centile.selected) {
+                    selectedData.push(centile.data);
+                    //console.log(centile.data);
+                    maxDataLength = maxDataLength < centile.data.length ? centile.data.length : maxDataLength;
+                    selectedSeries.push(centile.name);
+                    selectedDataColors.push(centile.color);
+                }
+            });
+            return {
+                series: selectedSeries,
+                data: selectedData,
+                dataColors: selectedDataColors
+            }
         }
     }
     return chartService;
