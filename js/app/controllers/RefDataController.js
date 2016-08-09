@@ -1,26 +1,26 @@
 /**
  * Created by chathura on 7/26/16.
  */
-function RefDataController($scope, $mdDialog,toastService) {
-    $scope.refData=new ReferenceData();
+function RefDataController($scope, $mdDialog, toastService) {
+    $scope.refData = new ReferenceData();
     $scope.xAxisPeriods = intervals;
 
-    $scope.close=function () {
+    $scope.close = function () {
         $mdDialog.cancel();
     }
 
-    $scope.submit=function () {
-        if(!$scope.refData.gender){
+    $scope.submit = function () {
+        if (!$scope.refData.gender) {
             toastService.showToast("Invalid gender selection.");
             return;
         }
 
-        if(!$scope.refData.xAxisPeriod){
+        if (!$scope.refData.xAxisPeriod) {
             toastService.showToast("Invalid time interval selection.")
             return;
         }
 
-        if($scope.refData.centiles.length==0){
+        if ($scope.refData.centiles.length == 0) {
             toastService.showToast("Invalid reference data.");
             return;
         }
@@ -76,12 +76,13 @@ function RefDataController($scope, $mdDialog,toastService) {
 
         rows.forEach(function (row, i) {
             var separatedValues = row.split(",");
+            var xVal = separatedValues[0];
 
             separatedValues.forEach(function (value, j) {
                 if (j != 0) {//skip dependant variable value
                     //ctrl.lc.centiles[j - 1].data[i] = value;
                     $scope.refData.centiles[j - 1].data.push({
-                        x: i,
+                        x: xVal,
                         y: value
                     });
                 }

@@ -51,7 +51,9 @@
 <div layout="column" layout-fill>
     <md-toolbar class="nav-dark">
         <div class="md-toolbar-tools">
-            <span><img src="img/logo_banner.png"></span>
+            <a href="" id="home-link">
+                <span><img src="img/logo_banner.png"></span>
+            </a>
         </div>
     </md-toolbar>
     <md-content>
@@ -66,5 +68,9 @@
 <script type="text/javascript" src="js/app/controllers/RefDataController.js"></script>
 <script type="text/javascript" src="js/app/app.js"></script>
 <!--Controllers-->
+<script>
+    var homeUrl=location.href.substr(0,location.href.indexOf('api'));
+    document.getElementById('home-link').setAttribute('href',homeUrl);
+</script>
 </body>
 </html>

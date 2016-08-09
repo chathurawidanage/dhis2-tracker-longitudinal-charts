@@ -125,7 +125,7 @@
                                     <div class="md-list-item-text">
                                         <p><b>{{cctrl.getIntervalByIndex(refData.xAxisPeriod)}}</b>
                                             reference data of <b>{{cctrl.getGenderByIndex(refData.gender)}}</b></p>
-                                        <p>{{refData.centiles.length}} centiles</p>
+                                        <p><i>{{refData.centiles.length}} centiles over {{refData.centiles[0].data.length-1}} {{cctrl.getIntervalByIndex(refData.xAxisPeriod,true)}}</i></p>
                                     </div>
 
                                     <md-divider ng-if="!$last"></md-divider>

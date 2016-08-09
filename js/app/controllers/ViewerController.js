@@ -43,7 +43,7 @@ function ViewerController($location, appService, teiService, $routeParams, toast
     };
 
     ctrl.getDateDiffInDays = function (date1, date2) {
-        return Math.floor((date1 - date2) / (1000 * 60 * 60 * 24 ));
+        return Math.floor(Math.abs(date1 - date2) / (1000 * 60 * 60 * 24 ));
     }
 
     this.refineCharts = function () {
@@ -51,6 +51,9 @@ function ViewerController($location, appService, teiService, $routeParams, toast
             chart.options.legend = {
                 display: true
             }
+            chart.options.tooltips={
+                enabled:false
+            };
 
             //axis labeling
             var chartDependantDataType = parseInt(chart.dependantDataType);
@@ -103,6 +106,10 @@ function ViewerController($location, appService, teiService, $routeParams, toast
             var maxTimeSpanInDays = 0;//the largest distance between the DOB and the data points available. The graph will be chosen depending on this
             var dataValues1 = [];
             var dataValues2 = [];
+            var dataValue2MaxMin = {
+                max: Number.MIN_VALUE,
+                min: Number.MAX_VALUE
+            }
             ctrl.teiEventData.forEach(function (event) {
                 event.dataValues.forEach(function (dataValue) {
                     if (chartDependantDataType == 0 || chartDependantDataType == 2) {//time span is important only in these two types
@@ -125,6 +132,13 @@ function ViewerController($location, appService, teiService, $routeParams, toast
                          dataToPlot.push(plotObject);
                          console.log(plotObject, updatedDate);*/
                     } else if (chartDependantDataType == 1 && dataValue.dataElement == yAxisVariable2) {
+                        if (dataValue2MaxMin.max < dataValue.value) {
+                            dataValue2MaxMin.max = dataValue.value;
+                        }
+
+                        if (dataValue2MaxMin.min > dataValue.value) {
+                            dataValue2MaxMin.min = dataValue.value;
+                        }
                         dataValues2.push(dataValue);
                     }
                 })
@@ -201,16 +215,68 @@ function ViewerController($location, appService, teiService, $routeParams, toast
                     defer.reject(error)
                 })
             } else {
+                var notOverFlowingRefData = [];
+                var overFlowingRefData = [];
+                /**
+                 * in this case, priority is given to the latest data. RefData is chosen such that it will cover latest data
+                 */
+                chart.refData.forEach(function (refData, index) {
+                    var centile = refData.centiles[Math.floor(refData.centiles.length/2)];
+                    var lowestX = centile.data[0].x;
+                    var highestX = centile.data[centile.data.length - 1].x;
+                    var refDataObj = {
+                        xLow: lowestX,
+                        xHigh: highestX,
+                        index: index
+                    }
+                    if (lowestX < dataValue2MaxMin.min && highestX > dataValue2MaxMin.max) {
+                        notOverFlowingRefData.push(refDataObj);
+                    } else {
+                        overFlowingRefData.push(refDataObj);
+                    }
+                });
 
+                var selectedRefData;
+                notOverFlowingRefData.sort(function (a, b) {
+                    return (a.xHigh - a.xLow) - (b.xHigh - b.xLow);
+                });
+                if (notOverFlowingRefData.length > 0) {
+                    selectedRefData = chart.refData[notOverFlowingRefData[0].index];
+                } else {
+                    console.log("Choosing from overflowed reference data");
+                    //todo implementation
+                    selectedRefData = chart.refData[overFlowingRefData[0].index];
+                }
+
+                var chartData = chartService.generateChartDataFromRefData(selectedRefData);
+                chart.series = chartData.series;
+                chart.data = chartData.data;
+                chart.dataColors = chartData.dataColors;
+
+                //data to plot
+                var dataToPlot = [];
+                dataValues2.forEach(function (dvX) {
+                    var createdDateX = new Date(dvX.created);
+                    dataValues1.forEach(function (dvY) {
+                        var createdDateY = new Date(dvY.created);
+                        var diff = ctrl.getDateDiffInDays(createdDateY, createdDateX);
+                        if (diff < 7) {
+                            var plotObject = {
+                                x: dvX.value,
+                                y: dvY.value
+                            }
+                            dataToPlot.push(plotObject);
+                            //todo break
+                        }
+                    })
+                });
+                defer.resolve(dataToPlot);
             }
 
             defer.promise.then(function (data) {
                 //adding patient data
                 chart.series.unshift("test");
                 chart.dataColors.unshift("#000000");
-                /*chart.data.unshift([
-                 "5", 6, 6.4, 3, 8, "5", "6", "8", "5"
-                 ]);*/
                 chart.data.unshift([]);
 
                 chart.dso = [{
@@ -221,17 +287,7 @@ function ViewerController($location, appService, teiService, $routeParams, toast
                     borderDash: [5, 15],
                     borderColor: "white",
                     skipNullValues: true,
-                    showLines: false,
-                    /*data: [{
-                     x: 0,
-                     y: 3.5
-                     }, {
-                     x: 2.5,
-                     y: 4.5
-                     }, {
-                     x: 3.5,
-                     y: 5
-                     }]*/
+                    showLines: false
                 }];
 
                 chart.dso[0].data = data;

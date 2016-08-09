@@ -261,8 +261,8 @@ function ChartController($location, $routeParams, $scope, $mdDialog, programServ
      * Will be called by UI to get the name of the interval by index
      * @param index
      */
-    ctrl.getIntervalByIndex = function (index) {
-        return intervals[parseInt(index)]
+    ctrl.getIntervalByIndex = function (index, noun) {
+        return noun ? intervalNoun[parseInt(index)] : intervals[parseInt(index)];
     }
 
 
